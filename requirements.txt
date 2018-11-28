@@ -2,3 +2,4 @@ numpy
 nltk
 pandas
 matplotlib
+gensim
