@@ -32,7 +32,7 @@ from nltk.stem.porter import PorterStemmer # approximate but effective (and comm
 
 
 # Define file paths
-home = '/home/jovyan/work/'
+home = '/vol_b/data/'
 wem_path = home + 'wem4themes/data/wem_model_300dims.bin' # path to WEM model
 charter_path = home + 'misc_data/charters_2015.pkl' # path to charter school data file
 dict_path = home + 'text_analysis/dictionary_methods/dicts/' # path to dictionary files (may not be used here)
@@ -165,24 +165,26 @@ for word in inquiry_fin:
 # - local_dicts: list of local dictionaries formatted as last of lists of terms--or if singular, just a list of terms
 # - local_names: names of local dictionaries (list or list of lists)
 
-# 500-term, unvalidated IBL dictionary:
-countsdfs_IBL500 = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
-                         local_dicts = [inquiry_fin], local_names = ["candidates"])
-
-countsdfs_IBL500.to_csv("data/inquiry_500_counts.csv")
-print(countsdfs_IBL500[0][450:])
-countsdfs_IBL500[0][:50]
-
 # Seed dictionary and similar terms:
 candidate_sims = model.most_similar(inqseed, topn=500)
 candidates_list = [pair[0] for pair in candidate_sims] + inqseed # Convert to list for frequency search below
-candidate_sims
-
-countsdfs_IBL5 = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
+countsdfs_IBL5sim = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
                          local_dicts = [candidates_list], local_names = ["IBL_candidates"])
-countsdfs_IBL5.to_csv("data/inquiry_seed_similar_counts.csv")
+countsdfs_IBL5sim.to_csv("output/inquiry_seed_similar_counts.csv")
 
 # 30-term IBL dictionary (core terms)
 countsdfs_IBL30 = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
                          local_dicts = [inq30], local_names = ["IBL_candidates"])
-countsdfs_IBL30.to_csv("data/inquiry_30_counts.csv")
+countsdfs_IBL30.to_csv("output/inquiry_30_counts.csv")
+
+# 30-term IBL dictionary and similar terms:
+candidate_sims = model.most_similar(inq30, topn=500)
+candidates_list = [pair[0] for pair in candidate_sims] + inq30 # Convert to list for frequency search below
+countsdfs_IBL30sim = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
+                         local_dicts = [candidates_list], local_names = ["IBL_candidates"])
+countsdfs_IBL30sim.to_csv("output/inquiry_30_similar_counts.csv")
+
+# 500-term, unvalidated IBL dictionary:
+countsdfs_IBL500 = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
+                         local_dicts = [inquiry_fin], local_names = ["candidates"])
+countsdfs_IBL500.to_csv("output/inquiry_500_counts.csv")
