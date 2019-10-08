@@ -19,6 +19,7 @@ import gc # For managing garbage collector
 from collections import Counter # For counting terms across the corpus
 from scipy.spatial import distance # To use cosine distances for tSNE metric
 import numpy as np # for working with vectors
+import pandas as pd # To work with DFs
 
 # Import functions from other scripts
 import sys; sys.path.insert(0, "../data_management/tools/") # To load functions from files in data_management/tools
@@ -40,13 +41,9 @@ charter_path = home + 'misc_data/charters_2015.pkl' # path to charter school dat
 dict_path = home + 'text_analysis/dictionary_methods/dicts/' # path to dictionary files (may not be used here)
 
 # For counting term frequencies, load text corpus:
+print("Loading text corpus for term counting...")
 df = load_filtered_df(charter_path, ["WEBTEXT", "NCESSCH"])
 df['WEBTEXT']=df['WEBTEXT'].fillna('') # turn nan to empty iterable for future convenience
-
-
-# ## Load word embedding model
-
-model = gensim.models.KeyedVectors.load_word2vec_format(wem_path, binary=True) # Load word2vec model
 
 
 # ## Define dictionaries
@@ -111,39 +108,62 @@ for word in inquiry500:
 # - local_names: names of local dictionaries (list or list of lists)
 
 # Find similar terms for seed and 30-term dictionaries, convert to list for frequency search:
-candidate_sims = model.most_similar(inqseed, topn=30)
-similar_inqseed = [pair[0] for pair in candidate_sims] + inqseed
-candidate_sims = model.most_similar(inq30, topn=30)
-similar_inq30 = [pair[0] for pair in candidate_sims]
+#candidate_sims = model.most_similar(inqseed, topn=5)
+#similar_inqseed = [pair[0] for pair in candidate_sims] + inqseed
+#candidate_sims = model.most_similar(inq30, topn=5)
+#similar_inq30 = [pair[0] for pair in candidate_sims]
 
 # Count term frequencies
 #dicts_to_count = [inq30, similar_inqseed, similar_inq30, inquiry500]
 #dict_names = ["IBL30", "IBLseed_similar", "IBL30_similar", "IBL500"]
 #dicts_to_compare = [[], inqseed, inq30, []]
 
-dicts_to_count = [inq30, similar_inqseed]
-dict_names = ["IBL30", "IBLseed_similar"]
-dicts_to_compare = [[], inqseed]
-countsdfs = count_master(df, dict_path = dict_path, dict_names = [], file_ext = '.txt', 
-                         local_dicts = dicts_to_count, local_names = dict_names)
+local_dicts = [inq30] #[inq30, similar_inqseed]
+local_names = ['inquiry30'] #["IBL30", "IBLseed_similar"]
+dicts_to_compare = [inqseed, inqseed]
+dicts_from_file = ['inquiry90_raw']
 
-# Add column to each DF with similarity of each term to inqseed
-#vectors = [model.get_vector(word) for word in keywords]
-#average_vector = np.mean(vectors, axis=0)
+countsdfs = count_master(df, dict_path = dict_path, dict_names = dicts_from_file, file_ext = '.txt', 
+                         local_dicts = local_dicts, local_names = local_names)
 
-# Compute similarity of each candidate term the dict it's compared to, add to DF
-for i, df in enumerate(countsdfs):
-    if len(dicts_to_compare[i])>0:
-        vectors = [model.get_vector(word) for word in dicts_to_compare[i]]
-        average_vector = np.mean(vectors, axis=0)
-        df["SIMILARITY"] = [(1 - distance.cosine(average_vector, model.get_vector(word))) for word in dicts_to_count[i]]
+# Load dictionaries for easier computing and printing
+file_dicts_number = len(dicts_from_file); local_dicts_number = len(local_names) # Makes comparisons faster
+if file_dicts_number>0: # If there are dicts to be loaded from file...
+    dict_list = load_dict(dictpath = dict_path, dictnames = dicts_from_file, fileext = '.txt') # Load dictionaries from file
+    dict_names = dicts_from_file
+if file_dicts_number>0 and local_dicts_number>0: # If there are dicts on file AND local dicts...
+    dict_list += local_dicts # full list of dictionary names
+    dict_names += local_names # full list of dictionaries
+else: # If there are only local dicts...
+    dict_list = local_dicts
+    dict_names = local_names
+
+file_dicts = load_dict(dictpath = dict_path, dictnames = dicts_from_file, fileext = ".txt")
+dicts_to_count = file_dicts + local_dicts
     
+# Compute similarity of each candidate term the dict it's compared to, add to DF
+if len(dicts_to_compare)>0:
+    print("Computing similarities...")
+    model = gensim.models.KeyedVectors.load_word2vec_format(wem_path, binary=True) # Load word2vec model 
+    dicts_to_compare = [[word for word in dic if word in model.vocab] for dic in dicts_to_compare]
+    dicts_to_count = [[word for word in dic if word in model.vocab] for dic in dicts_to_count]
+
+for i, countdf in enumerate(countsdfs):
+    if len(dicts_to_compare[i])>0:
+        vectors = [model.get_vector(word) for word in dicts_to_compare[i]] # Get vectors for comparison dictionary
+        average_vector = np.mean(vectors, axis=0) # Average comparison vectors
+        similarities = [(1 - distance.cosine(average_vector, model.get_vector(word))) for word in dicts_to_count[i]] # Get similarities
+        simdf = pd.DataFrame(similarities, index = dicts_to_count[i]) # Convert similarities to DF with terms as index
+        print("Adding to DF...")
+        #countdf["SIMILARITY"] = [(1 - distance.cosine(average_vector, model.get_vector(word))) for word in dicts_to_count[i]]
+        countdf = pd.merge(countdf, simdf, how="left", left_on = "TERM", right_index = True) # Merge similarities with count df
+
     # Print outputs
-    print("TERM COUNTS FOR " + str(dict_names[i].upper()) + " DICTIONARY:\n")
-    print(df)
+    print("\nTERM COUNTS FOR " + str(dict_names[i].upper()) + " DICTIONARY:\n")
+    print(countdf)
 
     # Save DF to disk
-    df.to_csv('output/{}_counts.csv'.format(dict_names[i]))
+    countdf.to_csv('output/{}_counts.csv'.format(dict_names[i]))
 
 '''
 # 30-term IBL dictionary (core terms)
