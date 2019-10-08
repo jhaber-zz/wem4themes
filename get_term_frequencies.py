@@ -118,10 +118,10 @@ for word in inquiry500:
 #dict_names = ["IBL30", "IBLseed_similar", "IBL30_similar", "IBL500"]
 #dicts_to_compare = [[], inqseed, inq30, []]
 
-local_dicts = [inq30] #[inq30, similar_inqseed]
-local_names = ['inquiry30'] #["IBL30", "IBLseed_similar"]
+local_dicts = [] #[inq30, similar_inqseed]
+local_names =  [] #["IBL30", "IBLseed_similar"]
 dicts_to_compare = [inqseed, inqseed]
-dicts_from_file = ['inquiry90_raw']
+dicts_from_file = ['inquiry90_raw', 'inquiry25_new]
 
 countsdfs = count_master(df, dict_path = dict_path, dict_names = dicts_from_file, file_ext = '.txt', 
                          local_dicts = local_dicts, local_names = local_names)
