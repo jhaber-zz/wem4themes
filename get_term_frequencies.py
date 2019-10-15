@@ -8,7 +8,7 @@
 # Creator: Jaren Haber, PhD Candidate
 # Institution: Department of Sociology, University of California, Berkeley
 # Date created: September 30, 2019
-# Date last modified: September 30, 2019
+# Date last modified: October 7, 2019
 
 # ## Initialize Python
 
@@ -26,7 +26,7 @@ import sys; sys.path.insert(0, "../data_management/tools/") # To load functions 
 from textlist_file import write_list, load_list # For saving and loading text lists to/from file
 from df_tools import check_df, convert_df, load_filtered_df, replace_df_nulls # For displaying basic DF info, storing DFs for memory efficiency, and loading a filtered DF
 from quickpickle import quickpickle_dump, quickpickle_load # For quickly loading & saving pickle files in Python
-import count_dict # For counting word frequencies in corpus (to assess candidate words)
+#import count_dict # For counting word frequencies in corpus (to assess candidate words)
 from count_dict import load_dict, Page, dict_precalc, dict_count, create_cols, count_words, collect_counts, count_master
 
 # For cleaning, tokenizing, and stemming the text
