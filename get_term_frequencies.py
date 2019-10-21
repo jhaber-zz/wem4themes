@@ -48,8 +48,18 @@ df['WEBTEXT']=df['WEBTEXT'].fillna('') # turn nan to empty iterable for future c
 
 # ## Define dictionaries
 
+riskseed = ["high-need", "low-income", "high-poverty", "at-risk", "high-risk"]
+
+# Narrow dictionary for at-risk
+risk20 = ["high-need", "high-needs", 
+            "low-income", "lower-income", "high-poverty", "impoverished", "economically_challenged", 
+            "underserved", "under-served", "disproportionately", 
+            "at-risk", "high-risk", "under-resourced", "under-represented", "under-performing", 
+            "inner-city", "inner_cities", 
+            "marginalized", "disconnected", "disenfranchised"]
+
 # Testing terms related to at-risk:
-risk_test = ['service', 'services', 'social_services', 'social_service', 'socialservices', 'diverse', 'diversity', 'cultural_diversity', 'culturally_diverse', 'culturallydiverse', 'family', 'district', 'dental', 'dental_services', 'dental_service', 'dentalservice', 'dentalservices', 'dental_care', 'dentalcare', 'medical', 'house', 'housing', 'cloth', 'clothe', 'clothes', 'clothing', 'ethnic', 'ethnic_identity', 'ethnicidentity', 'identity', 'health', 'employment', 'employment_services', 'employmentservices', 'economics', 'low-income', 'lowincome', 'low income', 'low_income', 'equality', 'equity', 'justice', 'disenfranchise', 'disenfranchised', 'disadvantage', 'disadvantaged', 'percentile', 'percentiles', 'quantile', 'quantiles', 'quintiles', 'quintile', 'quartile', 'quartiles', 'standard', 'support', 'supports', 'basic', 'basics', 'percent', 'urban', 'graduate', 'graduating', 'graduation', 'college', 'colleges', 'discipline', 'disciplinary', 'structural', 'structure', 'high-risk', 'at-risk', 'at_risk', 'at risk', 'represent', 'representation', 'under-represented', 'under_represented', 'under represented', 'need', 'high-needs', 'needs', 'high-need', 'high needs', 'great needs', 'under-resourced', 'underresourced', 'under_resourced', 'poverty', 'poor', 'impoverish', 'impoverished', 'under-achieving', 'underachieving', 'under_achieving', 'under achieving', 'African American', 'African', 'African-American', 'African_American', 'Hispanic', 'Hispanic-American', 'Latin', 'Latino', 'Latinx', 'Latin@', 'pregnant', 'impregnate', 'pregnancy', 'gifted', 'giftedprogram', 'gifted-program', 'gifted program', 'racism', 'racial', 'race', 'racist', 'racially', 'sexism', 'sexist', 'sex', 'generational', 'generation', 'cycle', 'cycles', 'chronic', 'chronically', 'food', 'nutrition', 'nutritious', 'nutritional', 'nutritive', 'nutrient', 'nutrients', 'prison', 'prisons', 'imprison', 'imprisoning', 'jail', 'jails', 'pipeline', 'pipe', 'incarcerate', 'incarceration', 'incarcerating', 'insecure', 'insecurity', 'assist', 'assistance', 'assisting', 'public_assistance', 'public-assistance', 'treatment', 'clinical', 'rehabilitate', 'rehabilitation', 'rehabilitated', 'rehabilitating', 'drug', 'drugs', 'drug_alcohol', 'drugs_and_alcohol', 'drugs and alcohol', 'case management', 'case_management', 'case-management', 'stable', 'stability', 'stabilize', 'stabilizing', 'counsel', 'counselling', 'counseling', 'counselor', 'counselors', 'behavior', 'behaviors', 'behavioral', 'continuum', 'continua', 'failure', 'failures', 'fail', 'failing', 'vulnerable', 'vulnerability', 'provide', 'provision', 'providing', 'provided', 'mental', 'mentality', 'substances', 'substance', 'patient', 'patients', 'abuse', 'abusive', 'abused', 'child abuse', 'abusing', 'dependent', 'dependency', 'dependencies', 'chemical', 'chemically', 'injury', 'illness', 'anxiety', 'anxious', 'anxieties', 'addiction', 'addictive', 'addict', 'addicts', 'punish', 'of color', 'of_color', 'people of color', 'of-color', 'people-of-color', 'people_of_color', 'out of school', 'out-of-school', 'out_of_school', 'truant', 'truancy', 'truism']
+risktest = ['service', 'services', 'social_services', 'social_service', 'socialservices', 'diverse', 'diversity', 'cultural_diversity', 'culturally_diverse', 'culturallydiverse', 'family', 'district', 'dental', 'dental_services', 'dental_service', 'dentalservice', 'dentalservices', 'dental_care', 'dentalcare', 'medical', 'house', 'housing', 'cloth', 'clothe', 'clothes', 'clothing', 'ethnic', 'ethnic_identity', 'ethnicidentity', 'identity', 'health', 'employment', 'employment_services', 'employmentservices', 'economics', 'low-income', 'lowincome', 'low income', 'low_income', 'equality', 'equity', 'justice', 'disenfranchise', 'disenfranchised', 'disadvantage', 'disadvantaged', 'percentile', 'percentiles', 'quantile', 'quantiles', 'quintiles', 'quintile', 'quartile', 'quartiles', 'standard', 'support', 'supports', 'basic', 'basics', 'percent', 'urban', 'graduate', 'graduating', 'graduation', 'college', 'colleges', 'discipline', 'disciplinary', 'structural', 'structure', 'high-risk', 'at-risk', 'at_risk', 'at risk', 'represent', 'representation', 'under-represented', 'under_represented', 'under represented', 'need', 'high-needs', 'needs', 'high-need', 'high needs', 'great needs', 'under-resourced', 'underresourced', 'under_resourced', 'poverty', 'poor', 'impoverish', 'impoverished', 'under-achieving', 'underachieving', 'under_achieving', 'under achieving', 'African American', 'African', 'African-American', 'African_American', 'Hispanic', 'Hispanic-American', 'Latin', 'Latino', 'Latinx', 'Latin@', 'pregnant', 'impregnate', 'pregnancy', 'gifted', 'giftedprogram', 'gifted-program', 'gifted program', 'racism', 'racial', 'race', 'racist', 'racially', 'sexism', 'sexist', 'sex', 'generational', 'generation', 'cycle', 'cycles', 'chronic', 'chronically', 'food', 'nutrition', 'nutritious', 'nutritional', 'nutritive', 'nutrient', 'nutrients', 'prison', 'prisons', 'imprison', 'imprisoning', 'jail', 'jails', 'pipeline', 'pipe', 'incarcerate', 'incarceration', 'incarcerating', 'insecure', 'insecurity', 'assist', 'assistance', 'assisting', 'public_assistance', 'public-assistance', 'treatment', 'clinical', 'rehabilitate', 'rehabilitation', 'rehabilitated', 'rehabilitating', 'drug', 'drugs', 'drug_alcohol', 'drugs_and_alcohol', 'drugs and alcohol', 'case management', 'case_management', 'case-management', 'stable', 'stability', 'stabilize', 'stabilizing', 'counsel', 'counselling', 'counseling', 'counselor', 'counselors', 'behavior', 'behaviors', 'behavioral', 'continuum', 'continua', 'failure', 'failures', 'fail', 'failing', 'vulnerable', 'vulnerability', 'provide', 'provision', 'providing', 'provided', 'mental', 'mentality', 'substances', 'substance', 'patient', 'patients', 'abuse', 'abusive', 'abused', 'child abuse', 'abusing', 'dependent', 'dependency', 'dependencies', 'chemical', 'chemically', 'injury', 'illness', 'anxiety', 'anxious', 'anxieties', 'addiction', 'addictive', 'addict', 'addicts', 'punish', 'of color', 'of_color', 'people of color', 'of-color', 'people-of-color', 'people_of_color', 'out of school', 'out-of-school', 'out_of_school', 'truant', 'truancy', 'truism']
 
 disc30 = ['absenteeism', 'authority', 'behavioral_expectations', 'crime', 'criminal', 'deter', 'deterrence', 'disciplinary', 'discipline', 'disobedience', 'drug-', 'related', 'drugs', 'expel', 'expellable', 'expulsion', 'illegal', 'inappropriate', 'misbehavior', 'no-excuses', 'penalize', 'penalty', 'perpetrator', 'punish', 'suspended', 'suspension', 'violate', 'violation', 'zero-tolerance', 'zero-tolerance_policy', 'zero_tolerance']
 
@@ -118,28 +128,33 @@ for word in inquiry500:
 #dict_names = ["IBL30", "IBLseed_similar", "IBL30_similar", "IBL500"]
 #dicts_to_compare = [[], inqseed, inq30, []]
 
-local_dicts = [] #[inq30, similar_inqseed]
-local_names =  [] #["IBL30", "IBLseed_similar"]
-dicts_to_compare = [inqseed, inqseed]
-dicts_from_file = ['inquiry90_raw', 'inquiry25_new]
+local_dicts = [risk20, risktest] #[inq30, similar_inqseed]
+local_names =  ['atrisk20', 'atrisk_test'] #["IBL30", "IBLseed_similar"]
+dicts_to_compare = [inqseed, inqseed, riskseed, riskseed]
+dicts_from_file = ['inquiry20_new', 'inquiry50_new']
 
 countsdfs = count_master(df, dict_path = dict_path, dict_names = dicts_from_file, file_ext = '.txt', 
                          local_dicts = local_dicts, local_names = local_names)
 
 # Load dictionaries for easier computing and printing
+local_dicts = [risk20, risktest] #[inq30, similar_inqseed]
+local_names =  ['atrisk20', 'atrisk_test'] #["IBL30", "IBLseed_similar"]
+dicts_to_compare = [inqseed, inqseed, riskseed, riskseed]
+dicts_from_file = ['inquiry20_new', 'inquiry50_new']
 file_dicts_number = len(dicts_from_file); local_dicts_number = len(local_names) # Makes comparisons faster
+
 if file_dicts_number>0: # If there are dicts to be loaded from file...
-    dict_list = load_dict(dictpath = dict_path, dictnames = dicts_from_file, fileext = '.txt') # Load dictionaries from file
+    dicts_to_count = load_dict(dictpath = dict_path, dictnames = dicts_from_file, fileext = '.txt') # Load dictionaries from file
     dict_names = dicts_from_file
 if file_dicts_number>0 and local_dicts_number>0: # If there are dicts on file AND local dicts...
-    dict_list += local_dicts # full list of dictionary names
+    dicts_to_count += local_dicts # full list of dictionary names
     dict_names += local_names # full list of dictionaries
 else: # If there are only local dicts...
-    dict_list = local_dicts
+    dicts_to_count = local_dicts
     dict_names = local_names
 
-file_dicts = load_dict(dictpath = dict_path, dictnames = dicts_from_file, fileext = ".txt")
-dicts_to_count = file_dicts + local_dicts
+#file_dicts = load_dict(dictpath = dict_path, dictnames = dicts_from_file, fileext = ".txt")
+#dicts_to_count = file_dicts + local_dicts
     
 # Compute similarity of each candidate term the dict it's compared to, add to DF
 if len(dicts_to_compare)>0:
